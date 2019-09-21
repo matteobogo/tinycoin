@@ -1,6 +1,6 @@
 package init;
 
-import entities.TinyCoinNode;
+import entities.TinyNode;
 import lombok.AccessLevel;
 import lombok.Getter;
 import peersim.core.CommonState;
@@ -32,14 +32,14 @@ public class Parameters {
 
     int _SELFISH_POOL_ACTIVE;
     double _SELFISH_POOL_POWER;
-    TinyCoinNode selfishPoolNode;
+    TinyNode selfishPoolNode;
 
     int _TRANS_EXT_PERIOD;
 
-    List<TinyCoinNode> cpuNodes = new ArrayList<>();
-    List<TinyCoinNode> gpuNodes = new ArrayList<>();
-    List<TinyCoinNode> fpgaNodes = new ArrayList<>();
-    List<TinyCoinNode> asicNodes = new ArrayList<>();
+    List<TinyNode> cpuNodes = new ArrayList<>();
+    List<TinyNode> gpuNodes = new ArrayList<>();
+    List<TinyNode> fpgaNodes = new ArrayList<>();
+    List<TinyNode> asicNodes = new ArrayList<>();
 
     int[] miningPowers;
 

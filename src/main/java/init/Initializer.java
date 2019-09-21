@@ -1,17 +1,17 @@
 package init;
 
-import entities.TinyCoinNode;
+import entities.TinyNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import peersim.config.Configuration;
 import peersim.core.*;
-import protocols.TinyCoinProtocol;
-import protocols.TinyCoinProtocolBaseMiner;
-import protocols.TinyCoinProtocolHonestMiner;
-import protocols.TinyCoinProtocolSelfishMiner;
+import protocols.TinyProtocol;
+import protocols.TinyProtocolBaseMiner;
+import protocols.TinyProtocolHonestMiner;
+import protocols.TinyProtocolSelfishMiner;
 import utilities.RandomWeightedCollection;
 
-public class TinyCoinInitializer implements Control {
+public class Initializer implements Control {
 
     /* Logging */
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -45,7 +45,7 @@ public class TinyCoinInitializer implements Control {
     private static final String PAR_SELFISH_POOL_ACTIVE = "selfish_pool_active";
     private static final String PAR_SELFISH_POOL_POWER = "selfish_pool_power";
 
-    public TinyCoinInitializer(String prefix) {
+    public Initializer(String prefix) {
 
         /* Recover protocol name from external config file */
 
@@ -137,7 +137,7 @@ public class TinyCoinInitializer implements Control {
 
         StringBuilder nodesLabels = new StringBuilder("\n- Nodes Information -\n");
 
-        TinyCoinNode node;
+        TinyNode node;
         int k = 0;
 
         if(Parameters.getIstance()._SELFISH_POOL_ACTIVE == 1) {
@@ -145,23 +145,23 @@ public class TinyCoinInitializer implements Control {
             log.info("Activated Single Selfish Pool with {}% Network Power",
                     Parameters.getIstance()._SELFISH_POOL_POWER * 100);
 
-            node = (TinyCoinNode) Network.get(0);
-            TinyCoinProtocolSelfishMiner pSelfish =
-                    (TinyCoinProtocolSelfishMiner) node.getProtocol(Parameters.getIstance()._PROTOCOL_3_ID);
+            node = (TinyNode) Network.get(0);
+            TinyProtocolSelfishMiner pSelfish =
+                    (TinyProtocolSelfishMiner) node.getProtocol(Parameters.getIstance()._PROTOCOL_3_ID);
             node.setCurrentProtocolId(Parameters.getIstance()._PROTOCOL_3_ID);
 
             pSelfish.init(
                     Parameters.getIstance()._PROTOCOL_3_ID,
                     Parameters.getIstance()._PROTOCOL_TRANSPORT_ID,
                     node.getID(),
-                    TinyCoinProtocol._NODE_TYPE_SELFISH_MINER);
+                    TinyProtocol._NODE_TYPE_SELFISH_MINER);
 
             //add power pool
             int poolWeight = (int)
                     ((Parameters.getIstance()._SELFISH_POOL_POWER * Parameters.getIstance().rwcMinerTypePower.getTotal())
                             / (1 - Parameters.getIstance()._SELFISH_POOL_POWER));
             Parameters.getIstance().rwcMinerTypePower
-                    .add(poolWeight,TinyCoinProtocol._NODE_TYPE_SELFISH_POOL);
+                    .add(poolWeight,TinyProtocol._NODE_TYPE_SELFISH_POOL);
 
             Parameters.getIstance().selfishPoolNode = node;
 
@@ -170,17 +170,17 @@ public class TinyCoinInitializer implements Control {
 
         for (int i = k; i < Network.size(); ++i) {
 
-            node = (TinyCoinNode) Network.get(i);
+            node = (TinyNode) Network.get(i);
 
             //choose node type
             String nodeType = Parameters.getIstance().rwcNodeType.next();
 
             switch (nodeType) {
 
-                case TinyCoinProtocol._NODE_TYPE_NORMAL:
+                case TinyProtocol._NODE_TYPE_NORMAL:
 
-                    TinyCoinProtocol pNormal =
-                            (TinyCoinProtocol) node.getProtocol(Parameters.getIstance()._PROTOCOL_1_ID);
+                    TinyProtocol pNormal =
+                            (TinyProtocol) node.getProtocol(Parameters.getIstance()._PROTOCOL_1_ID);
 
                     node.setCurrentProtocolId(Parameters.getIstance()._PROTOCOL_1_ID);
 
@@ -188,14 +188,14 @@ public class TinyCoinInitializer implements Control {
                             Parameters.getIstance()._PROTOCOL_1_ID,
                             Parameters.getIstance()._PROTOCOL_TRANSPORT_ID,
                             node.getID(),
-                            TinyCoinProtocol._NODE_TYPE_NORMAL);
+                            TinyProtocol._NODE_TYPE_NORMAL);
 
                     break;
 
-                case TinyCoinProtocol._NODE_TYPE_HONEST_MINER:
+                case TinyProtocol._NODE_TYPE_HONEST_MINER:
 
-                    TinyCoinProtocolHonestMiner pHonest =
-                            (TinyCoinProtocolHonestMiner) node.getProtocol(Parameters.getIstance()._PROTOCOL_2_ID);
+                    TinyProtocolHonestMiner pHonest =
+                            (TinyProtocolHonestMiner) node.getProtocol(Parameters.getIstance()._PROTOCOL_2_ID);
 
                     node.setCurrentProtocolId(Parameters.getIstance()._PROTOCOL_2_ID);
 
@@ -203,15 +203,15 @@ public class TinyCoinInitializer implements Control {
                             Parameters.getIstance()._PROTOCOL_2_ID,
                             Parameters.getIstance()._PROTOCOL_TRANSPORT_ID,
                             node.getID(),
-                            TinyCoinProtocol._NODE_TYPE_HONEST_MINER);
+                            TinyProtocol._NODE_TYPE_HONEST_MINER);
 
                     break;
 
 
-                case TinyCoinProtocol._NODE_TYPE_SELFISH_MINER:
+                case TinyProtocol._NODE_TYPE_SELFISH_MINER:
 
-                    TinyCoinProtocolSelfishMiner pSelfish =
-                            (TinyCoinProtocolSelfishMiner) node.getProtocol(Parameters.getIstance()._PROTOCOL_3_ID);
+                    TinyProtocolSelfishMiner pSelfish =
+                            (TinyProtocolSelfishMiner) node.getProtocol(Parameters.getIstance()._PROTOCOL_3_ID);
 
                     node.setCurrentProtocolId(Parameters.getIstance()._PROTOCOL_3_ID);
 
@@ -219,7 +219,7 @@ public class TinyCoinInitializer implements Control {
                             Parameters.getIstance()._PROTOCOL_3_ID,
                             Parameters.getIstance()._PROTOCOL_TRANSPORT_ID,
                             node.getID(),
-                            TinyCoinProtocol._NODE_TYPE_SELFISH_MINER);
+                            TinyProtocol._NODE_TYPE_SELFISH_MINER);
 
                     break;
             }
@@ -231,35 +231,35 @@ public class TinyCoinInitializer implements Control {
             if (node.getCurrentProtocolId() == Parameters.getIstance()._PROTOCOL_2_ID ||
                     node.getCurrentProtocolId() == Parameters.getIstance()._PROTOCOL_3_ID) {
 
-                TinyCoinProtocolBaseMiner minerProtocol =
-                        (TinyCoinProtocolBaseMiner) node.getProtocol(node.getCurrentProtocolId());
+                TinyProtocolBaseMiner minerProtocol =
+                        (TinyProtocolBaseMiner) node.getProtocol(node.getCurrentProtocolId());
 
                 //choose miner type
                 String minerType = Parameters.getIstance().rwcMinerType.next();
 
                 switch (minerType) {
 
-                    case TinyCoinProtocolBaseMiner._COMPUTATIONAL_TYPE_CPU:
+                    case TinyProtocolBaseMiner._COMPUTATIONAL_TYPE_CPU:
 
-                        minerProtocol.setComputationalType(TinyCoinProtocolBaseMiner._COMPUTATIONAL_TYPE_CPU);
+                        minerProtocol.setComputationalType(TinyProtocolBaseMiner._COMPUTATIONAL_TYPE_CPU);
                         Parameters.getIstance().cpuNodes.add(node);
                         break;
 
-                    case TinyCoinProtocolBaseMiner._COMPUTATIONAL_TYPE_GPU:
+                    case TinyProtocolBaseMiner._COMPUTATIONAL_TYPE_GPU:
 
-                        minerProtocol.setComputationalType(TinyCoinProtocolBaseMiner._COMPUTATIONAL_TYPE_GPU);
+                        minerProtocol.setComputationalType(TinyProtocolBaseMiner._COMPUTATIONAL_TYPE_GPU);
                         Parameters.getIstance().gpuNodes.add(node);
                         break;
 
-                    case TinyCoinProtocolBaseMiner._COMPUTATIONAL_TYPE_FPGA:
+                    case TinyProtocolBaseMiner._COMPUTATIONAL_TYPE_FPGA:
 
-                        minerProtocol.setComputationalType(TinyCoinProtocolBaseMiner._COMPUTATIONAL_TYPE_FPGA);
+                        minerProtocol.setComputationalType(TinyProtocolBaseMiner._COMPUTATIONAL_TYPE_FPGA);
                         Parameters.getIstance().fpgaNodes.add(node);
                         break;
 
-                    case TinyCoinProtocolBaseMiner._COMPUTATIONAL_TYPE_ASIC:
+                    case TinyProtocolBaseMiner._COMPUTATIONAL_TYPE_ASIC:
 
-                        minerProtocol.setComputationalType(TinyCoinProtocolBaseMiner._COMPUTATIONAL_TYPE_ASIC);
+                        minerProtocol.setComputationalType(TinyProtocolBaseMiner._COMPUTATIONAL_TYPE_ASIC);
                         Parameters.getIstance().asicNodes.add(node);
                         break;
                 }
@@ -286,15 +286,15 @@ public class TinyCoinInitializer implements Control {
 
         rwcNodeType.add(
                 Parameters.getIstance()._PERCENTAGE_HONEST_MINERS * 100,
-                TinyCoinProtocolBaseMiner._NODE_TYPE_HONEST_MINER);
+                TinyProtocolBaseMiner._NODE_TYPE_HONEST_MINER);
 
         rwcNodeType.add(
                 Parameters.getIstance()._PERCENTAGE_SELFISH_MINERS * 100,
-                TinyCoinProtocolBaseMiner._NODE_TYPE_SELFISH_MINER);
+                TinyProtocolBaseMiner._NODE_TYPE_SELFISH_MINER);
 
         rwcNodeType.add(
                 Parameters.getIstance()._PERCENTAGE_NORMAL_NODES * 100,
-                TinyCoinProtocolBaseMiner._NODE_TYPE_NORMAL);
+                TinyProtocolBaseMiner._NODE_TYPE_NORMAL);
 
         Parameters.getIstance().rwcNodeType = rwcNodeType;
 
@@ -303,19 +303,19 @@ public class TinyCoinInitializer implements Control {
 
         rwcMinerType.add(
                 Parameters.getIstance()._PERCENTAGE_CPU * 100,
-                TinyCoinProtocolBaseMiner._COMPUTATIONAL_TYPE_CPU);
+                TinyProtocolBaseMiner._COMPUTATIONAL_TYPE_CPU);
 
         rwcMinerType.add(
                 Parameters.getIstance()._PERCENTAGE_GPU * 100,
-                TinyCoinProtocolBaseMiner._COMPUTATIONAL_TYPE_GPU);
+                TinyProtocolBaseMiner._COMPUTATIONAL_TYPE_GPU);
 
         rwcMinerType.add(
                 Parameters.getIstance()._PERCENTAGE_FPGA * 100,
-                TinyCoinProtocolBaseMiner._COMPUTATIONAL_TYPE_FPGA);
+                TinyProtocolBaseMiner._COMPUTATIONAL_TYPE_FPGA);
 
         rwcMinerType.add(
                 Parameters.getIstance()._PERCENTAGE_ASIC * 100,
-                TinyCoinProtocolBaseMiner._COMPUTATIONAL_TYPE_ASIC);
+                TinyProtocolBaseMiner._COMPUTATIONAL_TYPE_ASIC);
 
         Parameters.getIstance().rwcMinerType = rwcMinerType;
 
@@ -324,19 +324,19 @@ public class TinyCoinInitializer implements Control {
 
         rwcMinerTypePower.add(
                 Parameters.getIstance().get_POWER_CPU() * 100,
-                TinyCoinProtocolBaseMiner._POWER_CPU);
+                TinyProtocolBaseMiner._POWER_CPU);
 
         rwcMinerTypePower.add(
                 Parameters.getIstance().get_POWER_GPU() * 100,
-                TinyCoinProtocolBaseMiner._POWER_GPU);
+                TinyProtocolBaseMiner._POWER_GPU);
 
         rwcMinerTypePower.add(
                 Parameters.getIstance().get_POWER_FPGA() * 100,
-                TinyCoinProtocolBaseMiner._POWER_FPGA);
+                TinyProtocolBaseMiner._POWER_FPGA);
 
         rwcMinerTypePower.add(
                 Parameters.getIstance().get_POWER_ASIC() * 100,
-                TinyCoinProtocolBaseMiner._POWER_ASIC);
+                TinyProtocolBaseMiner._POWER_ASIC);
 
         Parameters.getIstance().rwcMinerTypePower = rwcMinerTypePower;
     }

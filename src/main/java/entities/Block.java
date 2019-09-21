@@ -7,17 +7,17 @@ import lombok.Setter;
 import java.util.List;
 
 @Getter(AccessLevel.PUBLIC)
-public class TinyCoinBlock {
+public class Block {
 
     private final String currentBlockId;
     private final String previousBlockId;
-    private final List<TinyCoinTransaction> transactions;
+    private final List<Transaction> transactions;
     @Setter(AccessLevel.PUBLIC) private int height;
 
-    public TinyCoinBlock(
+    public Block(
             String currentBlockId,
             String previousBlockId,
-            List<TinyCoinTransaction> transactions,
+            List<Transaction> transactions,
             int height) {
 
         this.currentBlockId = currentBlockId;

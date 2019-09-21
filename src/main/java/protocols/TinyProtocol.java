@@ -17,7 +17,7 @@ import utilities.Utils;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TinyCoinProtocol implements CDProtocol, EDProtocol {
+public class TinyProtocol implements CDProtocol, EDProtocol {
 
     public static final String _NODE_TYPE_NORMAL = "NORMAL";
     public static final String _NODE_TYPE_HONEST_MINER = "HONEST_MINER";
@@ -45,23 +45,23 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
     @Getter(AccessLevel.PUBLIC) private String nodeType;
 
     /* TinyCoin Data Structures */
-    @Getter(AccessLevel.PUBLIC) protected TinyCoinBlockChain blockChain;
-    @Getter(AccessLevel.PUBLIC) protected Set<TinyCoinTransaction> mempoolSet;
-    @Getter(AccessLevel.PUBLIC) protected Set<TinyCoinBlock> orphanPool;
-    @Getter(AccessLevel.PUBLIC) protected Map<TinyCoinTransaction,Integer> unconfirmedTransactionMap;
+    @Getter(AccessLevel.PUBLIC) protected BlockChain blockChain;
+    @Getter(AccessLevel.PUBLIC) protected Set<Transaction> mempoolSet;
+    @Getter(AccessLevel.PUBLIC) protected Set<Block> orphanPool;
+    @Getter(AccessLevel.PUBLIC) protected Map<Transaction,Integer> unconfirmedTransactionMap;
 
     long lastSender;
 
-    public TinyCoinProtocol(String prefix) {}
+    public TinyProtocol(String prefix) {}
 
     @Override
     public Object clone() {
 
-        TinyCoinProtocol tiny = null;
+        TinyProtocol tiny = null;
 
         try {
 
-            tiny = (TinyCoinProtocol) super.clone();
+            tiny = (TinyProtocol) super.clone();
 
         }catch(CloneNotSupportedException e) {
             //
@@ -100,26 +100,26 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
     @Override
     public void processEvent(Node node, int pid, Object o) {
 
-        TinyCoinMessage message = (TinyCoinMessage) o;
+        Message message = (Message) o;
 
         this.lastSender = message.getSender();
         switch (message.getType()) {
 
-            case TinyCoinMessage._BLOCK:
+            case Message._BLOCK:
 
                 receivedBlock(
                         node,
                         pid,
-                        (TinyCoinBlock) message.getPayload());
+                        (Block) message.getPayload());
 
                 break;
 
-            case TinyCoinMessage._TRANSACTION:
+            case Message._TRANSACTION:
 
                 receivedTransaction(
                         node,
                         pid,
-                        (TinyCoinTransaction) message.getPayload());
+                        (Transaction) message.getPayload());
 
                 break;
         }
@@ -133,14 +133,14 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
         this.nodeType = nodeType;
 
         /* Genesis Block */
-        TinyCoinBlock genesis = new TinyCoinBlock(
+        Block genesis = new Block(
                 Parameters.getIstance().get_GENESIS_BLOCK_ID(),
                 null,
                 new ArrayList<>(),
                 0);
 
         /* Init BlockChain */
-        blockChain = new TinyCoinBlockChain(genesis);
+        blockChain = new BlockChain(genesis);
 
         initDataStructures();
         initWallet();
@@ -180,7 +180,7 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
             wallet = wallet - amount;
 
             //make transaction
-            TinyCoinTransaction transaction = new TinyCoinTransaction(
+            Transaction transaction = new Transaction(
                     nodeAddress,
                     receiverAddress,
                     amount);
@@ -191,7 +191,7 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
             broadcast(
                     localNode,
                     pid,
-                    new TinyCoinMessage(nodeAddress, TinyCoinMessage._TRANSACTION, transaction));
+                    new Message(nodeAddress, Message._TRANSACTION, transaction));
 
             mempoolSet.add(transaction);
 
@@ -200,7 +200,7 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
         }
     }
 
-    private boolean validateTransaction(TinyCoinTransaction transaction) {
+    private boolean validateTransaction(Transaction transaction) {
 
         //check sender address, receiver address, transaction amount in legal money range, if we have already a
         //matching transaction in mempool or in a block inside the main branch
@@ -212,14 +212,14 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
                 !blockChain.findTransactionInsideBlockChain(transaction);
     }
 
-    private void verifyIfTransactionIsForMe(TinyCoinTransaction transaction) {
+    private void verifyIfTransactionIsForMe(Transaction transaction) {
 
         if(transaction.getReceiverAddress() == nodeAddress && !unconfirmedTransactionMap.containsKey(transaction))
             unconfirmedTransactionMap.put(transaction,0);
     }
 
     void receivedTransaction(
-            Node node, int pid, TinyCoinTransaction transaction) {
+            Node node, int pid, Transaction transaction) {
 
         //transaction validation
         if(!validateTransaction(transaction)) return;
@@ -234,10 +234,10 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
         broadcast(
                 node,
                 pid,
-                new TinyCoinMessage(nodeAddress, TinyCoinMessage._TRANSACTION, transaction));
+                new Message(nodeAddress, Message._TRANSACTION, transaction));
     }
 
-    protected boolean validateBlock(TinyCoinBlock block) {
+    protected boolean validateBlock(Block block) {
 
         return block.getTransactions() != null &&
                 !block.getTransactions().isEmpty() &&
@@ -245,13 +245,13 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
                 block.getTransactions().get(0).getAmount() == computeBlockReward(block);
     }
 
-    private double computeBlockReward(TinyCoinBlock block) {
+    private double computeBlockReward(Block block) {
 
         return Parameters.getIstance().get_BLOCK_REWARD() + ((block.getTransactions().size()-1) *
                 Parameters.getIstance().get_TRANSACTION_REWARD());  //coinbase excluded
     }
 
-    private void verifyIfBlockContainsTransactionsForMe(TinyCoinBlock block) {
+    private void verifyIfBlockContainsTransactionsForMe(Block block) {
 
         int oldSize = unconfirmedTransactionMap.size();
         block.getTransactions()
@@ -266,7 +266,7 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
                 });
     }
 
-    void receivedBlock(Node node, int pid, TinyCoinBlock block) {
+    void receivedBlock(Node node, int pid, Block block) {
 
         //validations
         if(!validateBlock(block)) {
@@ -289,16 +289,16 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
         broadcast(
                 node,
                 pid,
-                new TinyCoinMessage(nodeAddress, TinyCoinMessage._BLOCK, block));
+                new Message(nodeAddress, Message._BLOCK, block));
 
         //manage orphans
         handleOrphans(node,pid,block);
     }
 
-    boolean handleBlockChain(TinyCoinBlock block) {
+    boolean handleBlockChain(Block block) {
 
-        TinyCoinBlock previous = blockChain.get(block.getPreviousBlockId());
-        TinyCoinBlock currentHead = blockChain.getHead();
+        Block previous = blockChain.get(block.getPreviousBlockId());
+        Block currentHead = blockChain.getHead();
 
         //where is the previous block of received block?
         if(previous == null) {
@@ -309,7 +309,7 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
         }
 
         //is there another block after the previous block?
-        Optional<TinyCoinBlock> isNewFork = blockChain.isNewFork(previous.getCurrentBlockId());
+        Optional<Block> isNewFork = blockChain.isNewFork(previous.getCurrentBlockId());
 
         //put block in the blockchain and update his height
         block.setHeight(previous.getHeight()+1);
@@ -360,7 +360,7 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
             }
 
             //find the forked block
-            TinyCoinBlock forkedBlock = blockChain.findForkedBlock(block,currentHead);
+            Block forkedBlock = blockChain.findForkedBlock(block,currentHead);
 
             if(forkedBlock == null) {
                 log.error("Node {} Error! No forked block found!", nodeAddress);
@@ -395,11 +395,11 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
         return true;
     }
 
-    private void handleChainSwap(TinyCoinBlock oldHead, TinyCoinBlock newHead, TinyCoinBlock forkedBlock) {
+    private void handleChainSwap(Block oldHead, Block newHead, Block forkedBlock) {
 
         //handle old main sub-chain
         //iterate main sub-chain from the head to the forked block
-        TinyCoinBlock mainChainPointer = oldHead;
+        Block mainChainPointer = oldHead;
 
         while(!mainChainPointer.equals(forkedBlock)) {
 
@@ -422,7 +422,7 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
 
         //handle new main sub-chain
         //iterate fork sub-chain from the head to the forked block
-        TinyCoinBlock sideChainPointer = newHead;
+        Block sideChainPointer = newHead;
 
         while(!sideChainPointer.equals(forkedBlock)) {
 
@@ -462,7 +462,7 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
 
     void checkMyUnconfirmedTransactionsAndUpdateWallet() {
 
-        List<TinyCoinTransaction> confirmed = new ArrayList<>();
+        List<Transaction> confirmed = new ArrayList<>();
         unconfirmedTransactionMap
                 .entrySet()
                 .stream()
@@ -481,7 +481,7 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
         confirmed.forEach(c -> unconfirmedTransactionMap.remove(c));
     }
 
-    private List<TinyCoinNode> getNeighbors(Node localNode, int pid) {
+    private List<TinyNode> getNeighbors(Node localNode, int pid) {
 
         //obtain neighbors
         Linkable link = (Linkable) localNode.getProtocol(FastConfig.getLinkable(pid));
@@ -489,16 +489,16 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
         //no neighbors
         if(link.degree() == 0) return null;
 
-        List<TinyCoinNode> neighbors = new ArrayList<>();
+        List<TinyNode> neighbors = new ArrayList<>();
         for(int i = 0; i < link.degree(); i++)
-            neighbors.add((TinyCoinNode) link.getNeighbor(i));
+            neighbors.add((TinyNode) link.getNeighbor(i));
 
         return neighbors;
     }
 
-    void broadcast(Node localNode, int pid, TinyCoinMessage message) {
+    void broadcast(Node localNode, int pid, Message message) {
 
-       List<TinyCoinNode> neighbors = getNeighbors(localNode,pid);
+       List<TinyNode> neighbors = getNeighbors(localNode,pid);
        if(neighbors == null) {
 
            log.error("Node {} doesn't have any neighbors",nodeAddress);
@@ -509,7 +509,7 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
         message.setSender(nodeAddress);
 
         //transport protocol
-        TinyCoinTransport transport = (TinyCoinTransport) localNode.getProtocol(transportId);
+        TinyTransport transport = (TinyTransport) localNode.getProtocol(transportId);
 
         neighbors
                 .stream()
@@ -519,9 +519,9 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
                     double latency = (long) transport.getBaseTransactionDelay();
 
                     //latency simulation for block propagation (K * nr. of transactions inside block)
-                    if(message.getType() == TinyCoinMessage._BLOCK) {
+                    if(message.getType() == Message._BLOCK) {
 
-                        int nTransactions = ((TinyCoinBlock) message.getPayload()).getTransactions().size();
+                        int nTransactions = ((Block) message.getPayload()).getTransactions().size();
                         latency = transport.getBaseBlockDelay() * nTransactions;
                     }
 
@@ -530,10 +530,10 @@ public class TinyCoinProtocol implements CDProtocol, EDProtocol {
                 });
     }
 
-    void handleOrphans(Node node, int pid, TinyCoinBlock block) {
+    void handleOrphans(Node node, int pid, Block block) {
 
         //is there any orphan block that have the last block added as parent?
-        List<TinyCoinBlock> orphans = orphanPool
+        List<Block> orphans = orphanPool
                 .stream()
                 .filter(v -> v.getPreviousBlockId().equals(block.getCurrentBlockId()))
                 .collect(Collectors.toList());

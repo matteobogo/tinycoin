@@ -11,7 +11,7 @@ import peersim.core.Node;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TinyCoinProtocolSelfishMiner extends TinyCoinProtocolBaseMiner {
+public class TinyProtocolSelfishMiner extends TinyProtocolBaseMiner {
 
     /** Logging */
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -20,9 +20,9 @@ public class TinyCoinProtocolSelfishMiner extends TinyCoinProtocolBaseMiner {
     @Getter(AccessLevel.PUBLIC) private int nSelfishMinerLosses;
     @Getter(AccessLevel.PUBLIC) private int nSelfishMinerWins;
     @Getter(AccessLevel.PUBLIC) private int nSelfishMinerTies;
-    @Getter(AccessLevel.PUBLIC) private List<TinyCoinBlock> privateBlockPublished;
+    @Getter(AccessLevel.PUBLIC) private List<Block> privateBlockPublished;
 
-    public TinyCoinProtocolSelfishMiner(String prefix) { super(prefix); }
+    public TinyProtocolSelfishMiner(String prefix) { super(prefix); }
 
     @Override
     public Object clone() {
@@ -42,7 +42,7 @@ public class TinyCoinProtocolSelfishMiner extends TinyCoinProtocolBaseMiner {
     }
 
     @Override
-    protected void receivedBlock(Node node, int pid, TinyCoinBlock block) {
+    protected void receivedBlock(Node node, int pid, Block block) {
 
         //validations
         if(!validateBlock(block)) {
@@ -85,7 +85,7 @@ public class TinyCoinProtocolSelfishMiner extends TinyCoinProtocolBaseMiner {
                     broadcast(
                             node,
                             pid,
-                            new TinyCoinMessage(nodeAddress, TinyCoinMessage._BLOCK, block));
+                            new Message(nodeAddress, Message._BLOCK, block));
 
                     //stats
                     nSelfishMinerLosses++;
@@ -100,7 +100,7 @@ public class TinyCoinProtocolSelfishMiner extends TinyCoinProtocolBaseMiner {
                     broadcast(
                             node,
                             pid,
-                            new TinyCoinMessage(nodeAddress, TinyCoinMessage._BLOCK, blockChain.getPrivateHead()));
+                            new Message(nodeAddress, Message._BLOCK, blockChain.getPrivateHead()));
 
                     //stats
                     nSelfishMinerTies++;
@@ -111,13 +111,13 @@ public class TinyCoinProtocolSelfishMiner extends TinyCoinProtocolBaseMiner {
                 //selfish miner wins due to the lead of 1: broadcast to neighbors all private chain blocks
                 case 2:
 
-                    List<TinyCoinBlock> privateBlocks = blockChain.getAllPrivateChainBlocksToFork();
-                    for (TinyCoinBlock privBlock : privateBlocks) {
+                    List<Block> privateBlocks = blockChain.getAllPrivateChainBlocksToFork();
+                    for (Block privBlock : privateBlocks) {
 
                         broadcast(
                                 node,
                                 pid,
-                                new TinyCoinMessage(nodeAddress, TinyCoinMessage._BLOCK, privBlock));
+                                new Message(nodeAddress, Message._BLOCK, privBlock));
 
                         privateBlockPublished.add(privBlock);
 
@@ -135,7 +135,7 @@ public class TinyCoinProtocolSelfishMiner extends TinyCoinProtocolBaseMiner {
                 //selfish miner wins due to a lead grater then 1
                 default:
 
-                    TinyCoinBlock firstUnpublishedBlock = blockChain.getFirstUnpublishedBlock();
+                    Block firstUnpublishedBlock = blockChain.getFirstUnpublishedBlock();
 
                     if(firstUnpublishedBlock == null) {
 
@@ -147,7 +147,7 @@ public class TinyCoinProtocolSelfishMiner extends TinyCoinProtocolBaseMiner {
                     broadcast(
                             node,
                             pid,
-                            new TinyCoinMessage(nodeAddress, TinyCoinMessage._BLOCK, firstUnpublishedBlock));
+                            new Message(nodeAddress, Message._BLOCK, firstUnpublishedBlock));
 
                     blockChain.setLastPublishedBlock(firstUnpublishedBlock);
 
@@ -163,16 +163,16 @@ public class TinyCoinProtocolSelfishMiner extends TinyCoinProtocolBaseMiner {
             broadcast(
                     node,
                     pid,
-                    new TinyCoinMessage(nodeAddress, TinyCoinMessage._BLOCK, block));
+                    new Message(nodeAddress, Message._BLOCK, block));
         }
 
         //manage orphans
         handleOrphans(node,pid,block);
     }
 
-    private boolean findTransactionInsidePrivateChain(TinyCoinTransaction transaction) {
+    private boolean findTransactionInsidePrivateChain(Transaction transaction) {
 
-        List<TinyCoinBlock> privateBlocks = blockChain.getAllPrivateChainBlocksToFork();
+        List<Block> privateBlocks = blockChain.getAllPrivateChainBlocksToFork();
 
         int j = 0;
         boolean found = false;
@@ -186,7 +186,7 @@ public class TinyCoinProtocolSelfishMiner extends TinyCoinProtocolBaseMiner {
     }
 
     @Override
-    protected void receivedTransaction(Node node, int pid, TinyCoinTransaction transaction) {
+    protected void receivedTransaction(Node node, int pid, Transaction transaction) {
 
         //is transaction inside private chain?
         if(findTransactionInsidePrivateChain(transaction)) {
@@ -218,8 +218,8 @@ public class TinyCoinProtocolSelfishMiner extends TinyCoinProtocolBaseMiner {
         //selfish miner wins
         if(delta == 0 && blockChain.getPrivateChainLength() == 2) {
 
-            List<TinyCoinBlock> privateBlocks = blockChain.getAllPrivateChainBlocksToFork();
-            for (TinyCoinBlock privateBlock : privateBlocks) {
+            List<Block> privateBlocks = blockChain.getAllPrivateChainBlocksToFork();
+            for (Block privateBlock : privateBlocks) {
 
                 //block contains transactions for me?
                 privateBlock
@@ -244,7 +244,7 @@ public class TinyCoinProtocolSelfishMiner extends TinyCoinProtocolBaseMiner {
                 broadcast(
                         node,
                         pid,
-                        new TinyCoinMessage(nodeAddress, TinyCoinMessage._BLOCK, privateBlock));
+                        new Message(nodeAddress, Message._BLOCK, privateBlock));
 
                 privateBlockPublished.add(privateBlock);
             }

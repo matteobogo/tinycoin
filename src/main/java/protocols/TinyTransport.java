@@ -5,7 +5,7 @@ import peersim.core.Node;
 import peersim.edsim.EDSimulator;
 import peersim.transport.Transport;
 
-public class TinyCoinTransport implements Transport {
+public class TinyTransport implements Transport {
 
     private static final String PARAM_TRANS = "base_transaction_delay";
     private static final String PARAM_BLOCK = "base_block_delay";
@@ -15,7 +15,7 @@ public class TinyCoinTransport implements Transport {
 
     private long dynamicLatency;
 
-    public TinyCoinTransport(String prefix) {
+    public TinyTransport(String prefix) {
 
         this.baseTransactionDelay = Configuration.getDouble(prefix + "." + PARAM_TRANS);
         this.baseBlockDelay = Configuration.getDouble(prefix + "." + PARAM_BLOCK);

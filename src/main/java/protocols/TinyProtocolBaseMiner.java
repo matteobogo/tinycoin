@@ -1,7 +1,7 @@
 package protocols;
 
-import entities.TinyCoinBlock;
-import entities.TinyCoinTransaction;
+import entities.Block;
+import entities.Transaction;
 import init.Parameters;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter(AccessLevel.PUBLIC)
-public abstract class TinyCoinProtocolBaseMiner extends TinyCoinProtocol {
+public abstract class TinyProtocolBaseMiner extends TinyProtocol {
 
     /** Logging */
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -38,10 +38,10 @@ public abstract class TinyCoinProtocolBaseMiner extends TinyCoinProtocol {
     /** Statistics */
     @Getter(AccessLevel.PUBLIC) protected int blocksMined;
 
-    protected TinyCoinBlock currentMiningBlock;
+    protected Block currentMiningBlock;
     protected boolean isMining;
 
-    TinyCoinProtocolBaseMiner(String prefix) {
+    TinyProtocolBaseMiner(String prefix) {
         super(prefix);
     }
 
@@ -63,7 +63,7 @@ public abstract class TinyCoinProtocolBaseMiner extends TinyCoinProtocol {
         this.blocksMined = 0;
     }
 
-    void mining(TinyCoinBlock headBlock) {
+    void mining(Block headBlock) {
 
         //no transactions in mempool
         if(mempoolSet.isEmpty()) {
@@ -75,9 +75,9 @@ public abstract class TinyCoinProtocolBaseMiner extends TinyCoinProtocol {
         this.isMining = true;
 
         //take transactions from mempool
-        List<TinyCoinTransaction> prioritizedTransactions = this.mempoolSet
+        List<Transaction> prioritizedTransactions = this.mempoolSet
                 .stream()
-                .sorted(Comparator.comparing(TinyCoinTransaction::getAmount).reversed())
+                .sorted(Comparator.comparing(Transaction::getAmount).reversed())
                 .limit(Parameters.getIstance().get_MAX_BLOCK_TRANSACTIONS()-1) //reserved 1 slot for coinbase
                 .collect(Collectors.toList());
 
@@ -90,7 +90,7 @@ public abstract class TinyCoinProtocolBaseMiner extends TinyCoinProtocol {
                         (Parameters.getIstance().get_TRANSACTION_REWARD() * prioritizedTransactions.size());
 
         //generate coinbase transaction
-        TinyCoinTransaction coinbase = new TinyCoinTransaction(
+        Transaction coinbase = new Transaction(
                 this.nodeAddress,
                 this.nodeAddress,
                 reward);
@@ -99,7 +99,7 @@ public abstract class TinyCoinProtocolBaseMiner extends TinyCoinProtocol {
         prioritizedTransactions.add(0,coinbase);
 
         //candidate block
-        this.currentMiningBlock = new TinyCoinBlock(
+        this.currentMiningBlock = new Block(
                 Utils.getRandomUniqueID(),
                 headBlock.getCurrentBlockId(),
                 prioritizedTransactions,

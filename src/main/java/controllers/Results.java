@@ -1,7 +1,7 @@
 package controllers;
 
-import entities.TinyCoinBlock;
-import entities.TinyCoinNode;
+import entities.Block;
+import entities.TinyNode;
 import init.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,14 +10,14 @@ import peersim.core.CommonState;
 import peersim.core.Control;
 import peersim.core.Network;
 import peersim.core.Node;
-import protocols.TinyCoinProtocol;
-import protocols.TinyCoinProtocolBaseMiner;
-import protocols.TinyCoinProtocolSelfishMiner;
+import protocols.TinyProtocol;
+import protocols.TinyProtocolBaseMiner;
+import protocols.TinyProtocolSelfishMiner;
 
 import java.text.DecimalFormat;
 import java.util.List;
 
-public class TinyCoinResults implements Control {
+public class Results implements Control {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
     private static final String PAR_END_SIM = "simulation_end";
@@ -33,11 +33,11 @@ public class TinyCoinResults implements Control {
     private int nCycles = 0;
     private int nUnresolvedForks = 0;
 
-    public TinyCoinResults(String prefix) {
+    public Results(String prefix) {
         this.simulationEnd = Configuration.getLong(prefix + "." + PAR_END_SIM);
     }
 
-    private void printStats(Node node, TinyCoinProtocol p) {
+    private void printStats(Node node, TinyProtocol p) {
         log.info("-----------------------------");
         log.info("Node {} STATS", node.getID());
         log.info("-----------------------------");
@@ -60,33 +60,33 @@ public class TinyCoinResults implements Control {
         log.info("- TinyCoin Statistics -");
         log.info("-----------------------------");
 
-        TinyCoinNode node;
-        TinyCoinProtocol protocol;
+        TinyNode node;
+        TinyProtocol protocol;
 
         for(int i = 0; i < Network.size(); ++i) {
-            node = (TinyCoinNode) Network.get(i);
-            protocol = (TinyCoinProtocol) node.getProtocol(node.getCurrentProtocolId());
+            node = (TinyNode) Network.get(i);
+            protocol = (TinyProtocol) node.getProtocol(node.getCurrentProtocolId());
 
             printStats(node,protocol);
 
             /* Miners */
             String nodeType = protocol.getNodeType();
 
-            if(!nodeType.equals(TinyCoinProtocol._NODE_TYPE_NORMAL)) {
+            if(!nodeType.equals(TinyProtocol._NODE_TYPE_NORMAL)) {
 
-                TinyCoinProtocolBaseMiner pMiner = (TinyCoinProtocolBaseMiner) protocol;
+                TinyProtocolBaseMiner pMiner = (TinyProtocolBaseMiner) protocol;
 
                 log.info("Blocks Mined: {}",pMiner.getBlocksMined());
 
                 switch (nodeType) {
 
-                    case TinyCoinProtocol._NODE_TYPE_HONEST_MINER:
+                    case TinyProtocol._NODE_TYPE_HONEST_MINER:
 
                         break;
 
-                    case TinyCoinProtocol._NODE_TYPE_SELFISH_MINER:
+                    case TinyProtocol._NODE_TYPE_SELFISH_MINER:
 
-                        TinyCoinProtocolSelfishMiner pSelfish = (TinyCoinProtocolSelfishMiner) protocol;
+                        TinyProtocolSelfishMiner pSelfish = (TinyProtocolSelfishMiner) protocol;
 
                         log.info("Selfish Mining losses: {}", pSelfish.getNSelfishMinerLosses());
                         nSelfishMinersLosses += pSelfish.getNSelfishMinerLosses();
@@ -116,16 +116,16 @@ public class TinyCoinResults implements Control {
 
         if(Parameters.getIstance().get_SELFISH_POOL_ACTIVE() == 1) {
 
-            TinyCoinNode poolNode = Parameters.getIstance().getSelfishPoolNode();
-            TinyCoinProtocolSelfishMiner pSelfish =
-                    (TinyCoinProtocolSelfishMiner) poolNode.getProtocol(poolNode.getCurrentProtocolId());
+            TinyNode poolNode = Parameters.getIstance().getSelfishPoolNode();
+            TinyProtocolSelfishMiner pSelfish =
+                    (TinyProtocolSelfishMiner) poolNode.getProtocol(poolNode.getCurrentProtocolId());
 
-            List<TinyCoinBlock> blocksPublished = pSelfish.getPrivateBlockPublished();
+            List<Block> blocksPublished = pSelfish.getPrivateBlockPublished();
 
-            List<TinyCoinBlock> publicChain = pSelfish.getBlockChain().getPublicChain();
+            List<Block> publicChain = pSelfish.getBlockChain().getPublicChain();
 
             int counter = 0;
-            for (TinyCoinBlock privBlockPublished : blocksPublished)
+            for (Block privBlockPublished : blocksPublished)
                 if (publicChain.contains(privBlockPublished))
                     ++counter;
 
@@ -144,7 +144,7 @@ public class TinyCoinResults implements Control {
             log.info("Mempool Size: {}",pSelfish.getMempoolSet().size());
             log.info("Private Blocks Published: {}",blocksPublished.size());
             log.info("Private Blocks inside Main Branch: {}",counter);
-            log.info("Selfish pool chosen {} times of {} total choices", TinyCoinOracle.nSelfishPoolChosen, TinyCoinOracle.nMinersChosen);
+            log.info("Selfish pool chosen {} times of {} total choices", Oracle.nSelfishPoolChosen, Oracle.nMinersChosen);
             log.info("Forks: {}", pSelfish.getNForks());
             log.info("Swaps: {}", pSelfish.getBranchesSwaps());
 
@@ -168,8 +168,8 @@ public class TinyCoinResults implements Control {
         /* Forks */
         while(i < Network.size()) {
 
-            node = (TinyCoinNode) Network.get(i);
-            protocol = (TinyCoinProtocol) node.getProtocol(node.getCurrentProtocolId());
+            node = (TinyNode) Network.get(i);
+            protocol = (TinyProtocol) node.getProtocol(node.getCurrentProtocolId());
 
             protocol.getForks().values()
                     .forEach(e -> {

@@ -9,19 +9,19 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
-public class TinyCoinBlockChain {
+public class BlockChain {
 
     /** BlockChain Params */
-    @Getter(AccessLevel.PUBLIC) private final LinkedHashMap<String,TinyCoinBlock> blocks;
-    @Getter(AccessLevel.PUBLIC) private final TinyCoinBlock genesis;
-    @Setter(AccessLevel.PUBLIC) @Getter(AccessLevel.PUBLIC) private TinyCoinBlock head;
+    @Getter(AccessLevel.PUBLIC) private final LinkedHashMap<String,Block> blocks;
+    @Getter(AccessLevel.PUBLIC) private final Block genesis;
+    @Setter(AccessLevel.PUBLIC) @Getter(AccessLevel.PUBLIC) private Block head;
 
     /** Selfish Params */
-    @Setter(AccessLevel.PUBLIC) @Getter(AccessLevel.PUBLIC) private TinyCoinBlock privateHead;
+    @Setter(AccessLevel.PUBLIC) @Getter(AccessLevel.PUBLIC) private Block privateHead;
     @Getter(AccessLevel.PUBLIC) private int privateChainLength;
-    @Setter(AccessLevel.PUBLIC) @Getter(AccessLevel.PUBLIC) private TinyCoinBlock lastPublishedBlock;
+    @Setter(AccessLevel.PUBLIC) @Getter(AccessLevel.PUBLIC) private Block lastPublishedBlock;
 
-    public TinyCoinBlockChain(TinyCoinBlock genesis) {
+    public BlockChain(Block genesis) {
 
         blocks = new LinkedHashMap<>();
         blocks.put(genesis.getCurrentBlockId(),genesis);
@@ -32,20 +32,20 @@ public class TinyCoinBlockChain {
         this.lastPublishedBlock = genesis;
     }
 
-    public void put(TinyCoinBlock block) {
+    public void put(Block block) {
 
         blocks.put(block.getCurrentBlockId(),block);
     }
 
-    public TinyCoinBlock get(String id) {
+    public Block get(String id) {
 
         return blocks.get(id);
     }
 
-    public TinyCoinBlock findForkedBlock(TinyCoinBlock newHead, TinyCoinBlock oldHead) {
+    public Block findForkedBlock(Block newHead, Block oldHead) {
 
-        TinyCoinBlock mainChainPointer = oldHead;
-        TinyCoinBlock newChainPointer = newHead;
+        Block mainChainPointer = oldHead;
+        Block newChainPointer = newHead;
 
         while(!mainChainPointer.equals(newChainPointer)) {
             if(mainChainPointer.getHeight() > newChainPointer.getHeight())
@@ -56,10 +56,10 @@ public class TinyCoinBlockChain {
         return mainChainPointer;
     }
 
-    public boolean findTransactionInsideBlockChain(TinyCoinTransaction transaction) {
+    public boolean findTransactionInsideBlockChain(Transaction transaction) {
 
         boolean found = false;
-        TinyCoinBlock cursor = this.head;
+        Block cursor = this.head;
 
         while(!cursor.equals(genesis) && !found) {
 
@@ -72,10 +72,10 @@ public class TinyCoinBlockChain {
         return found;
     }
 
-    public List<TinyCoinBlock> getPublicChain() {
+    public List<Block> getPublicChain() {
 
-        List<TinyCoinBlock> publicChain = new ArrayList<>();
-        TinyCoinBlock pubPointer = this.head;
+        List<Block> publicChain = new ArrayList<>();
+        Block pubPointer = this.head;
 
         while(!pubPointer.equals(this.genesis)) {
 
@@ -89,7 +89,7 @@ public class TinyCoinBlockChain {
         return publicChain;
     }
 
-    public Optional<TinyCoinBlock> isNewFork(String forkedBlockId) {
+    public Optional<Block> isNewFork(String forkedBlockId) {
 
         return blocks.values()
                 .stream()
@@ -106,12 +106,12 @@ public class TinyCoinBlockChain {
         this.privateChainLength = 0;
     }
 
-    public List<TinyCoinBlock> getAllPrivateChainBlocksToFork() {
+    public List<Block> getAllPrivateChainBlocksToFork() {
 
-        List<TinyCoinBlock> privateBlocks = new ArrayList<>();
+        List<Block> privateBlocks = new ArrayList<>();
 
-        TinyCoinBlock headPointer = this.getHead();
-        TinyCoinBlock privHeadPointer = this.privateHead;
+        Block headPointer = this.getHead();
+        Block privHeadPointer = this.privateHead;
 
         while(!headPointer.equals(privHeadPointer)) {
 
@@ -126,10 +126,10 @@ public class TinyCoinBlockChain {
         return privateBlocks;
     }
 
-    public TinyCoinBlock getFirstUnpublishedBlock() {
+    public Block getFirstUnpublishedBlock() {
 
-        TinyCoinBlock cursor = this.privateHead;
-        TinyCoinBlock firstUnpublishedBlock = null;
+        Block cursor = this.privateHead;
+        Block firstUnpublishedBlock = null;
 
         while(!cursor.equals(this.lastPublishedBlock)) {
 

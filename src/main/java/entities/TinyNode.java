@@ -5,13 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 import peersim.core.GeneralNode;
 
-public class TinyCoinNode extends GeneralNode {
+public class TinyNode extends GeneralNode {
 
     @Getter(AccessLevel.PUBLIC)
     @Setter(AccessLevel.PUBLIC)
     private int currentProtocolId;
 
-    public TinyCoinNode(String s) {
+    public TinyNode(String s) {
         super(s);
     }
 }

@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
-public class TinyCoinMessage {
+public class Message {
 
     public static final int _BLOCK = 0;
     public static final int _TRANSACTION = 1;
@@ -13,7 +13,7 @@ public class TinyCoinMessage {
     @Getter(AccessLevel.PUBLIC) private final int type;
     @Getter(AccessLevel.PUBLIC) private final Object payload;
 
-    public TinyCoinMessage(long sender, int type, Object payload) {
+    public Message(long sender, int type, Object payload) {
         this.sender = sender;
         this.type = type;
         this.payload = payload;

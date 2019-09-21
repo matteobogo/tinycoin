@@ -1,19 +1,19 @@
 package protocols;
 
-import entities.TinyCoinBlock;
-import entities.TinyCoinMessage;
-import entities.TinyCoinTransaction;
+import entities.Block;
+import entities.Message;
+import entities.Transaction;
 import init.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import peersim.core.Node;
 
-public class TinyCoinProtocolHonestMiner extends TinyCoinProtocolBaseMiner {
+public class TinyProtocolHonestMiner extends TinyProtocolBaseMiner {
 
     /** Logging */
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    public TinyCoinProtocolHonestMiner(String prefix) {
+    public TinyProtocolHonestMiner(String prefix) {
 
         super(prefix);
     }
@@ -25,9 +25,9 @@ public class TinyCoinProtocolHonestMiner extends TinyCoinProtocolBaseMiner {
     }
 
     @Override
-    protected void receivedBlock(Node node, int pid, TinyCoinBlock block) {
+    protected void receivedBlock(Node node, int pid, Block block) {
 
-        TinyCoinBlock oldMainChainHead = blockChain.getHead();
+        Block oldMainChainHead = blockChain.getHead();
 
         super.receivedBlock(node,pid,block);
 
@@ -37,7 +37,7 @@ public class TinyCoinProtocolHonestMiner extends TinyCoinProtocolBaseMiner {
     }
 
     @Override
-    protected void receivedTransaction(Node node, int pid, TinyCoinTransaction transaction) {
+    protected void receivedTransaction(Node node, int pid, Transaction transaction) {
 
         super.receivedTransaction(node,pid,transaction);
 
@@ -82,9 +82,9 @@ public class TinyCoinProtocolHonestMiner extends TinyCoinProtocolBaseMiner {
         this.broadcast(
                 node,
                 pid,
-                new TinyCoinMessage(
+                new Message(
                         this.nodeAddress,
-                        TinyCoinMessage._BLOCK,
+                        Message._BLOCK,
                         this.currentMiningBlock)
         );
 
