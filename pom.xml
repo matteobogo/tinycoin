@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.tinycoin</groupId>
+    <artifactId>tinycoin</artifactId>
+    <version>${env.VERSION}</version>
+    <packaging>jar</packaging>
+    <name>tinycoin</name>
+    <description>Simulating fraudolent mining strategies in a semplified Bitcoin Network.</description>
+
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>tinycoin</finalName>
+                            <archive>
+                                <manifest>
+                                    <mainClass>
+                                        peersim.Simulator
+                                    </mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>			
+        </plugins>
+    </build>
+
+    <dependencies>
+        <!-- PeerSim v.1.0.5 -->
+        <dependency>
+            <groupId>com.tinycoin</groupId>
+            <artifactId>peersim</artifactId>
+            <version>1.0.5</version>
+            <type>jar</type>
+        </dependency>
+        <!-- djep v.1.0.0 -->
+        <dependency>
+            <groupId>com.tinycoin</groupId>
+            <artifactId>djep</artifactId>
+            <version>1.0.0</version>
+            <type>jar</type>
+        </dependency>
+        <!-- jep v.2.3.0 -->
+        <dependency>
+            <groupId>com.tinycoin</groupId>
+            <artifactId>jep</artifactId>
+            <version>2.3.0</version>
+            <type>jar</type>
+        </dependency>
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.16</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- slf4j -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.5</version>
+        </dependency>
+        <!-- Apache Commons -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.6</version>
+        </dependency>
+    </dependencies>
+</project>
